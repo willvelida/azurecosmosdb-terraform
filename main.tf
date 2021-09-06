@@ -12,7 +12,7 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "rg" {
-  name = "cosmosdblearn-rg"
+  name = var.rgname
   location = "australiaeast"
 }
 
@@ -31,4 +31,19 @@ resource "azurerm_cosmosdb_account" "db" {
     location = azurerm_resource_group.rg.location
     failover_priority = 0
   }
+}
+
+resource "azurerm_cosmosdb_sql_database" "db" {
+  name = var.cosmosdbname
+  resource_group_name = azurerm_resource_group.rg.name
+  account_name = azurerm_cosmosdb_account.db.name
+}
+
+resource "azurerm_cosmosdb_sql_container" "container" {
+  name = var.cosmosdbcontainer
+  resource_group_name = azurerm_resource_group.rg.name
+  account_name = azurerm_cosmosdb_account.db.name
+  database_name = azurerm_cosmosdb_sql_database.db.name
+  partition_key_path = "/id"
+  throughput = 400
 }
