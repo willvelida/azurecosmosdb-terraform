@@ -16,6 +16,11 @@ resource "azurerm_resource_group" "rg" {
   location = "australiaeast"
 }
 
+data "azurerm_log_analytics_workspace" "loganalytics" {
+  name = var.loganalyticsname
+  resource_group_name = var.loganalytics_resource_group_name
+}
+
 resource "azurerm_cosmosdb_account" "db" {
   name = "velidatutorialcosmosdb"
   location = azurerm_resource_group.rg.location
@@ -46,4 +51,35 @@ resource "azurerm_cosmosdb_sql_container" "container" {
   database_name = azurerm_cosmosdb_sql_database.db.name
   partition_key_path = "/id"
   throughput = 400
+}
+
+resource "azurerm_monitor_diagnostic_setting" "cosmosdbdiagnostic" {
+  name = var.cosmos_log_settings_name
+  target_resource_id = azurerm_cosmosdb_account.db.id
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.loganalytics.id
+
+  log {
+    category = "DataPlaneRequests"
+    enabled = true
+  }
+
+  log {
+    category = "QueryRuntimeStatistics"
+    enabled = true
+  }
+
+  log {
+    category = "PartitionKeyStatistics"
+    enabled = true
+  }
+
+  log {
+    category = "PartitionKeyRUConsumption"
+    enabled = true
+  }
+
+  log {
+    category = "ControlPlaneRequests"
+    enabled = true
+  }
 }
