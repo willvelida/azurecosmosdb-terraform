@@ -5,6 +5,12 @@ terraform {
         version = "~> 2.65"
     }
   }
+  backend "azure" {
+    resource_group_name = "velidacosmosdbtfdemo"
+    storage_account_name = "velidacosmosdbtfstate"
+    container_name = "tfstate"
+    key = "terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
